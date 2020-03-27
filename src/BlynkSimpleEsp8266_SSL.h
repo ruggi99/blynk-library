@@ -75,9 +75,9 @@ public:
             // the TLS certificates offered by the server are currently valid.
             configTime(0, 0, "pool.ntp.org", "time.nist.gov");
             time_t now = time(nullptr);
-            while (now < 100000) {
-                delay(500);
-                now = time(nullptr);
+            if (now < 100000) {
+                BLYNK_LOG1(BLYNK_F("Error configuring global time"));
+                return false;
             }
             struct tm timeinfo;
             gmtime_r(&now, &timeinfo);

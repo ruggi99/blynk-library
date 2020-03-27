@@ -55,7 +55,7 @@ public:
         if (domain) {
             BLYNK_LOG4(BLYNK_F("Connecting to "), domain, ':', port);
 
-            isConn = (1 == client->connect(domain, port));
+            isConn = (1 == client->connectAsync(domain, port));
             return isConn;
         } else { //if (uint32_t(addr) != 0) {
             BLYNK_LOG_IP("Connecting to ", addr);
