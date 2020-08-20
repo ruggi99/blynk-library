@@ -37,7 +37,7 @@ public:
 
     void setClient(Client* c) {
         client = c;
-        client->setTimeout(BLYNK_TIMEOUT_MS);
+        client->setTimeout(0);
     }
 
     void begin(IPAddress a, uint16_t p) {
@@ -54,8 +54,9 @@ public:
     bool connect() {
         if (domain) {
             BLYNK_LOG4(BLYNK_F("Connecting to "), domain, ':', port);
+            BLYNK_LOG2(BLYNK_F("[Blynk] Timeout "), client->getTimeout());
 
-            isConn = (1 == client->connectAsync(domain, port));
+            isConn = (1 == client->connect(domain, port));
             return isConn;
         } else { //if (uint32_t(addr) != 0) {
             BLYNK_LOG_IP("Connecting to ", addr);
@@ -63,6 +64,10 @@ public:
             return isConn;
         }
         return false;
+    }
+
+    int getTimeout() {
+        return client->getTimeout();
     }
 
     void disconnect() { isConn = false; client->stop(); }
@@ -112,7 +117,16 @@ public:
     }
 #endif
 
-    bool connected() { YIELD_FIX(); return isConn && client->connected(); }
+    bool connected() { YIELD_FIX(); return client->connected(); }
+    bool connecting() { YIELD_FIX(); return client->connecting(); }
+    bool justConnected() {
+        YIELD_FIX();
+        bool ret = false;
+        if (client->connected() && !isConn)
+            ret = true;
+        isConn = client->connected();
+        return ret;
+    }
     int available() {  YIELD_FIX(); return client->available(); }
 
 protected:

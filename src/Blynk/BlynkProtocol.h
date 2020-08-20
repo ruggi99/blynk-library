@@ -200,13 +200,21 @@ bool BlynkProtocol<Transp>::run(bool avail)
         if (!tconn)
             conn.connect();
 #else
-        if (tconn && (t - lastLogin > BLYNK_TIMEOUT_MS)) {
-            BLYNK_LOG1(BLYNK_F("Login timeout"));
-            conn.disconnect();
-            state = CONNECTING;
-            return false;
-        } else if (!tconn && (t - lastLogin > 5000UL)) {
-            conn.disconnect();
+        if (tconn) {
+            if (t - lastLogin > BLYNK_TIMEOUT_MS) {
+                BLYNK_LOG1(BLYNK_F("Login timeout"));
+                conn.disconnect();
+                state = CONNECTING;
+                return false;
+            } else if (conn.justConnected()) {
+                msgIdOut = 1;
+                sendCmd(BLYNK_CMD_HW_LOGIN, 1, authkey, strlen(authkey));
+                lastLogin = lastActivityOut;
+                return true;
+            }
+        } else if (!tconn && (t - lastLogin > BLYNK_TIMEOUT_MS) && !conn.connecting()) {
+            BLYNK_LOG1(BLYNK_F("Blynk conn.connecting() returns false here"));
+            //conn.disconnect();
             if (!conn.connect()) {
                 lastLogin = t;
                 return false;
