@@ -148,6 +148,8 @@ bool BlynkProtocol<Transp>::run(bool avail)
       return true;
     }
 
+    conn.keepConnecting();
+
     if (conn.connected()) {
         while (avail || conn.available() > 0) {
             //BLYNK_LOG2(BLYNK_F("Available: "), conn.available());

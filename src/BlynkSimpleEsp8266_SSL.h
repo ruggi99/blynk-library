@@ -41,6 +41,8 @@
 #include <WiFiClientSecure.h>
 #include <time.h>
 
+static const X509List BlynkCert(BLYNK_DEFAULT_CERT_DER, sizeof(BLYNK_DEFAULT_CERT_DER));
+
 template <typename Client>
 class BlynkArduinoClientSecure
     : public BlynkArduinoClientGen<Client>
@@ -54,7 +56,8 @@ public:
     void setFingerprint(const char* fp) { fingerprint = fp; }
 
     bool setCACert(const uint8_t* caCert, unsigned caCertLen) {
-        bool res = this->client->setCACert(caCert, caCertLen);
+        bool res = true;
+        this->client->setTrustAnchors(&BlynkCert);
         if (!res) {
           BLYNK_LOG1("Failed to load root CA certificate!");
         }
@@ -62,7 +65,8 @@ public:
     }
 
     bool setCACert_P(const uint8_t* caCert, unsigned caCertLen) {
-        bool res = this->client->setCACert_P(caCert, caCertLen);
+        bool res = true;
+        this->client->setTrustAnchors(&BlynkCert);
         if (!res) {
           BLYNK_LOG1("Failed to load root CA certificate!");
         }
@@ -88,13 +92,13 @@ public:
 
         // Now try connecting
         if (BlynkArduinoClientGen<Client>::connect()) {
-          if (fingerprint && this->client->verify(fingerprint, this->domain)) {
+          /*if (fingerprint && this->client->verify(fingerprint, this->domain)) {
               BLYNK_LOG1(BLYNK_F("Fingerprint OK"));
               return true;
           } else if (this->client->verifyCertChain(this->domain)) {
-              BLYNK_LOG1(BLYNK_F("Certificate OK"));
+              BLYNK_LOG1(BLYNK_F("Certificate OK"));*/
               return true;
-          }
+          //}
           BLYNK_LOG1(BLYNK_F("Certificate not validated"));
           return false;
         }

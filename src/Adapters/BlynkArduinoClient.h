@@ -54,7 +54,6 @@ public:
     bool connect() {
         if (domain) {
             BLYNK_LOG4(BLYNK_F("Connecting to "), domain, ':', port);
-            BLYNK_LOG2(BLYNK_F("[Blynk] Timeout "), client->getTimeout());
 
             isConn = (1 == client->connect(domain, port));
             return isConn;
@@ -127,6 +126,7 @@ public:
         isConn = client->connected();
         return ret;
     }
+    void keepConnecting() { YIELD_FIX(); client->keepConnecting(); }
     int available() {  YIELD_FIX(); return client->available(); }
 
 protected:
